@@ -187,6 +187,7 @@ Route::middleware(['auth'])->group(function () {
  4.表示されるファイル:resources/views/students/index.blade.php
  */   
         // 学生登録画面 20250928
+        // 登録画面を表示（GET）
         Route::get('/create', 'StudentController@create')->name('students.create');
  /* 20250928
  ・HTTPメソッド: GET - 学生登録画面を表示
@@ -198,6 +199,7 @@ Route::middleware(['auth'])->group(function () {
  実際の処理の流れ
  　新規登録フォームを表示するだけ
  */
+        // 登録処理を実行（POST）
         Route::post('/store', 'StudentController@store')->name('students.store');
  /* 20250928
  ・HTTPメソッド: POST - 学生登録処理を実行
@@ -232,7 +234,7 @@ Route::middleware(['auth'])->group(function () {
  */       
         // 学生詳細表示画面 20250928
         Route::get('/{id}', 'StudentController@show')->name('students.show');
-/* 20250928
+ /* 20250928
  ・HTTPメソッド: GET - 画面を表示
  ・URL: '/{id}' (prefix内での相対パス)+ '/students/123'(実際のURL（123は学生ID))
  ・パラメーター: {id} URLから学生IDを受け取る
@@ -278,7 +280,100 @@ Route::middleware(['auth'])->group(function () {
  STEP 6: ビュー表示
  return view('students.show', compact('student'))
      ↓
- 詳細画面表示
+ 詳細画面表示 resources/views/students/show.blade.php
+ */
+        // 学生編集画面 20250929
+        // 編集画面を表示（GET）
+        Route::get('/{id}/edit', 'StudentController@edit')->name('students.edit');
+/* 20250929
+ ・HTTPメソッド: GET - 学生編集画面を表示
+ ・URL: '/{id}/edit' (prefix内での相対パス)+ '/students/123/edit'(実際のURL)
+ ・パラメーター: {id} URLから編集する学生IDを受け取る
+ ・処理: StudentController@editの編集画面表示メソッドを実行
+ ・return view('students.edit', compact('student')): resources/views/students/edit.blade.phpを表示
+ ・ルート名: students.edit
+
+ 実際の処理の流れ
+ STEP 1: URLからIDを取得
+ /students/123/edit → $id = 123
+
+ STEP 2: データベースから学生情報取得
+ Student::findOrFail(123)
+     ↓
+ $student = {
+    id: 123,
+    student_number: "2024123",
+    name: "田中太郎",
+    grade: 1
+ }
+
+ STEP 3: 編集画面に既存データを渡す
+ return view('students.edit', compact('student'))
+      ↓
+ 編集フォームに現在の値が入った状態で表示
 */
+        // 編集内容を更新（PUT）
+        Route::put('/{id}', 'StudentController@update')->name('students.update');
+/* 20250929
+ ・HTTPメソッド: PUT - データ更新専用メソッド(全体更新)
+ ・URL: '/{id}' (prefix内での相対パス)+ '/students/123'(実際のURL)
+ ・処理: StudentController@updateの更新処理メソッドを実行
+ ・ルート名: students.update
+
+ 実際の処理の流れ
+ 1.【編集画面】
+    URL: /students/123/edit
+    学生編集 例: 名前[田中太郎]→名前[田中次郎]に更新
+    PUT /students/123
+ 2.【更新処理実行】
+    StudentController@update
+    - バリデーション ✅
+    - DB更新 ✅
+    - リダイレクト準備
+         ↓
+ 4.【詳細画面】
+    URL: /students/123
+    学生詳細 名前[田中次郎]に更新済み
+*/
+        // 学生削除 20250929
+        Route::delete('/{id}', 'StudentController@destroy')->name('students.destroy');
+/* 20250929
+  ・HTTPメソッド: DELETE - データを削除
+  ・URL: '/{id}' (prefix内での相対パス)+ '/students/{id}'(実際のURL)
+  ・処理: StudentController@destroyの削除処理メソッドを実行
+ ・ルート名: students.destroy
+
+   実際の動作例
+   [ブラウザ]                [Laravel]                [データベース]
+    |                        |                          |
+    | 1. 削除ボタンクリック     |                          |
+    |----------------------->|                          |
+    | POST /students/{id}    |                          |
+    | _method=DELETE         |                          |
+    |                        |                          |
+    |　　　　　　　　　　  2. ルート判定                     |
+    |                    web.php                        |
+    |                  DELETE /{id}                     |
+    |                        |                          |
+    | 　　　　　　　　　　 3. コントローラー呼び出し           |
+    |                    StudentController              |
+    |                    destroy({id})                  |
+    |                        |                          |
+    |                        | 4. データ削除　　　　　　　  |
+    |                        |------------------------->|
+    |                        |  DELETE FROM students    |
+    |                        |  WHERE id = {id}         |
+    |                        |<-------------------------|
+    |                        | 5. 削除完了       　　     |
+    |                        |                          |
+    |   6. リダイレクト        |                          |
+    |<-----------------------|                          |
+    |   GET /students        |                          |
+    |                        |                          |
+    |   7. 一覧画面表示        |                          |
+    |<-----------------------|                          |
+    |  「削除しました」      　 |                          |
+*/
+
     });
 });
