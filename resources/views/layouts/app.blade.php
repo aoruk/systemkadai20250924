@@ -170,6 +170,107 @@
         /* .btn-warning 警告・編集 黄色 編集ボタン */
         /* .btn-danger 危険・削除 赤色 削除ボタン */
         /* .btn-secondary サブアクション グレー キャンセルボタン */
+        /* .btn-sm = Small（小さい）ボタン 20251001ここから */  
+
+        /* テーブル */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        /* border-collapse: collapse; セルの枠線を1本にまとめる */
+        
+        table th,
+        table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* フォーム */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        
+        /* エラーメッセージ */
+        .error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        /* ページタイトル */
+        .page-title {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+        
+        /* フッター */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            margin-top: 3rem;
+        }
+        
+        /* ユーティリティ */
+        /* ユーティリティクラスとは？ */
+        /* 1つの機能だけを持つクラスでどこでも使い回せる */
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+        
+        .d-flex {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .align-center {
+            align-items: center;
+        }
     </style>    
         
 </html>
