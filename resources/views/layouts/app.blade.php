@@ -274,7 +274,142 @@
     </style>
     
     @yield('styles')
-</head>  
+</head> 
+
+ <body> <!--20251002 -->
+    @auth
+    <!-- @auth とは？ ログインしているユーザーにだけ表示 -->
+
+    <!-- ヘッダー（ログイン後のみ表示） -->
+    <header class="header">
+        <h1>学生成績管理システム</h1>
+        <div class="header-user">
+            ログイン中: {{ Auth::user()->name ?? 'ゲスト' }}
+        </div>
+
+        <!-- Auth::user() -->
+        <!-- ↑現在ログイン中のユーザー情報を取得 -->
+        <!-- ->name -->
+        <!-- ↑ユーザーの名前を取得 -->
+        <!-- ?? 演算子（Null合体演算子） -->
+        <!-- ↑左側がnullなら右側を使う -->
+    </header>
+    
+    <!-- ナビゲーション（ログイン後のみ表示） -->
+    <nav class="nav">
+        <ul>
+            <li><a href="{{ route('menu') }}">メニュー</a></li>
+            <li><a href="{{ route('students.index') }}">学生一覧</a></li>
+            <li><a href="{{ route('students.create') }}">学生登録</a></li>
+            <li><a href="{{ route('grades.create') }}">成績追加</a></li>
+            <li>
+                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                    @csrf
+                    <!-- CSRF保護とは？ -->
+                    <!-- 悪いサイトから勝手に操作されないための防御機能 -->
+                    <button type="submit" style="background:none; border:none; color:white; cursor:pointer; padding:0.5rem 1rem;">
+                        ログアウト
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+    @endauth
+    
+    <!-- メインコンテンツ -->
+    <div class="container">
+        <!-- フラッシュメッセージ -->
+
+        <!-- セッションから'success'キーの値を取得  -->
+         <!-- 1. success（成功メッセージ） -->
+         <!-- 用途: -->
+         <!-- 処理が成功した時 -->
+         <!-- データを登録・更新・削除した時 --> 
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+        
+        <!-- セッションから'error'キーの値を取得  -->
+         <!-- 2. error（エラーメッセージ） -->
+         <!-- 用途: -->
+         <!-- 処理が失敗した時 -->
+         <!-- 予期しないエラーが発生した時 -->
+         <!-- 権限がない操作をしようとした時 -->
+        @if(session('error'))
+            <div class="alert alert-error">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <!-- セッションから'info'キーの値を取得  -->
+         <!-- 3. info（情報メッセージ） -->
+         <!-- 用途: -->
+         <!-- ユーザーに情報を伝える時 -->
+         <!-- 注意事項を表示する時 -->
+         <!-- 検索結果の件数など -->
+        @if(session('info'))
+            <div class="alert alert-info">
+                {{ session('info') }}
+            </div>
+        @endif
+
+        <!-- session() とは？
+        セッションの仕組み
+        リクエスト1（登録画面）
+        ─────────────────
+         ブラウザ → サーバー
+         ↓
+         セッション作成
+         session_id: abc123
+         ↓
+         ブラウザ ← Cookie（session_id=abc123）
+         
+        リクエスト2（登録処理）
+        ─────────────────
+         ブラウザ → サーバー（session_id=abc123を送信）
+         ↓
+         セッションに保存
+         session('success', 'メッセージ')
+         ↓
+         リダイレクト
+
+        リクエスト3（一覧画面）
+        ─────────────────
+         ブラウザ → サーバー（session_id=abc123を送信）
+         ↓
+         セッションから取得
+         session('success')  // 'メッセージ'
+         ↓
+         画面に表示
+         ↓
+         自動的に削除（フラッシュデータ） -->
+
+        <!-- バリデーションエラー -->
+        @if($errors->any())
+            <div class="alert alert-error">
+                <strong>入力エラーがあります：</strong>
+                <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
+        <div class="content">
+            @yield('content')
+        </div>
+    </div>
+    
+    <!-- フッター -->
+    <footer class="footer">
+        <p>&copy; 2025 学生成績管理システム</p>
+    </footer>
+    
+    @yield('scripts')
+</body>
         
 </html>
 
