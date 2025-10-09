@@ -271,7 +271,10 @@
         .align-center {
             align-items: center;
         }
-    </style>    
+    </style>
+    
+    @yield('styles')
+</head>  
         
 </html>
 
