@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
  Route::patch('/url', 'Controller@method');   // PATCH リクエスト（部分更新）
 */
 
-// ホーム画面（管理ユーザーログイン画面）20250926 
+// ホーム画面　20251003
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
@@ -373,6 +373,30 @@ Route::middleware(['auth'])->group(function () {
   |<-----------------------|                          |
   |  「削除しました」      　 |                          |
  */
+
+         // 検索機能（ここに移動）20251003
+         Route::get('/search', 'StudentController@search')->name('students.search');
+/* 20250930
+  ・HTTPメソッド: GET - 検索結果を表示
+  ・URL: '/search' (相対パス) + '/students/' (prefix)
+  ・パラメータ: クエリストリング（URLの?以降）で検索条件を受け取る
+    - 例: /students/search?keyword=山田 → 「山田」で検索
+    - 例: /students/search?keyword=太郎&grade=1 → 複数条件で検索
+  ・処理: StudentControllerのsearchを実行
+  ・return view('students.index', compact('students')): 検索結果を表示
+  ・ルート名: students.search
+
+  実際の処理の流れ
+  1. ユーザーが検索フォームにキーワードを入力して送信
+  2. ブラウザが GET /students/search?keyword=山田 にアクセス
+  3. Laravel が StudentController を探す (ファイル場所: app/Http/Controllers/StudentController.php)
+  4. searchメソッドを実行
+     - $request->get('keyword'): 検索キーワードを取得
+     - Student::where('name', 'like', "%山田%"): あいまい検索を実行
+     - SQL実行例: SELECT * FROM students WHERE name LIKE '%山田%'
+  5. 表示されるファイル: resources/views/students/index.blade.php
+  6. 検索結果の学生一覧が表示される
+*/
     });
     // 成績管理関連 20250930
     Route::prefix('grades')->group(function () {
@@ -499,28 +523,5 @@ Route::middleware(['auth'])->group(function () {
   6. 「成績を削除しました」メッセージを表示
 */
   });
-
-  // 検索機能 20250930
-  Route::get('/search', 'StudentController@search')->name('students.search');
-/* 20250930
-  ・HTTPメソッド: GET - 検索結果を表示
-  ・URL: '/search' (相対パス) + '/students/' (prefix)
-  ・パラメータ: クエリストリング（URLの?以降）で検索条件を受け取る
-    - 例: /students/search?keyword=山田 → 「山田」で検索
-    - 例: /students/search?keyword=太郎&grade=1 → 複数条件で検索
-  ・処理: StudentControllerのsearchを実行
-  ・return view('students.index', compact('students')): 検索結果を表示
-  ・ルート名: students.search
-
-  実際の処理の流れ
-  1. ユーザーが検索フォームにキーワードを入力して送信
-  2. ブラウザが GET /students/search?keyword=山田 にアクセス
-  3. Laravel が StudentController を探す (ファイル場所: app/Http/Controllers/StudentController.php)
-  4. searchメソッドを実行
-     - $request->get('keyword'): 検索キーワードを取得
-     - Student::where('name', 'like', "%山田%"): あいまい検索を実行
-     - SQL実行例: SELECT * FROM students WHERE name LIKE '%山田%'
-  5. 表示されるファイル: resources/views/students/index.blade.php
-  6. 検索結果の学生一覧が表示される
-*/  
+ 
 });
