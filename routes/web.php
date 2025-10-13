@@ -21,17 +21,6 @@ use Illuminate\Support\Facades\Route;
  Route::patch('/url', 'Controller@method');   // PATCH リクエスト（部分更新）
 */
 
-// ホーム画面　20251004 (必要ない為一度コメントアウト)
-// Route::get('/', function () {
-//     return view('welcome');
-// })->name('home');
-/* 20250927
- ・Route::get() : GETメソッドでアクセスされた時の処理
- ・'/' : URL（この場合はルートURL）
- ・function () { ... } : 無名関数（クロージャ）で直接ビューを返す
- ・return view('welcome') : resources/views/welcome.blade.phpを表示
-*/
-
 // 認証関連のルート 20251004 
 // 直接ログイン画面を表示（GET）
 Route::get('/', function () {
