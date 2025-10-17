@@ -135,6 +135,7 @@
     /* border-collapse: collapse; テーブルのセル間の境界線をどう表示するかを指定する */
     /* セルとセルの境界線が 1つに統合 される */
 
+    /* - テーブルヘッダー */
     thead {
         background: #f7fafc;
         border-bottom: 2px solid #e2e8f0;
@@ -305,6 +306,70 @@
         </form>
     </div>
 
-    
+    <!-- テーブルセクション 20251007 -->
+    <div class="table-section">
+        <div class="table-header">
+            <h2>学生表示</h2>
+            <span class="student-count">
+                全 {{ $students->total() ?? 0 }} 件
+            </span>
+        </div>
+        <!-- {{ $students->total() ?? 0 }}:学生の総件数を表示する（エラー回避付き） -->
+        <!-- {{ 値1 ?? 値2 }} これは Null合体演算子（Null Coalescing Operator） -->
+        <!-- 値1が存在して null でなければ → 値1を返す -->
+        <!-- 値1が存在しないか null なら → 値2を返す -->
+
+        @if($students->count() > 0)
+        <!-- 条件分岐 「学生が1件以上いる場合のみテーブルを表示」-->
+        <!-- @if($students->count() > 0)
+         学生データがある場合に表示
+         @endif -->
+        <!-- $students->count() とは？ 現在ページの件数 を取得-->
+            <table>
+                <thead>
+                    <tr>
+                        <th>学生</th>
+                        <th>名前</th>
+                        <th>住所</th>
+                        <th class="actions-cell">詳細表示</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($students as $student)
+                    <!-- ループ処理 -->
+                    <!-- $students の各レコードを $student として1つずつ処理 -->
+                    <tr>
+                        <td>
+                            <span class="student-year">{{ $student->year }}年生</span>
+                        </td>
+                        <td class="student-name">{{ $student->name }}</td>
+                        <td>{{ $student->address }}</td>
+                        <td class="actions-cell">
+                            <a href="{{ route('students.show', $student->id) }}" class="btn btn-primary btn-sm">
+                                詳細表示
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <!-- ページネーション -->
+            @if($students->hasPages()) <!--「ページが複数ある場合のみページネーションを表示」 -->
+            <div style="padding: 20px 24px; border-top: 1px solid #e2e8f0;">
+                {{ $students->links() }}
+            </div>
+            @endif
+        @else
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>学生が見つかりませんでした</h3>
+                <p>検索条件を変更してください。</p>
+            </div>
+        @endif
+        <!--  1ページしかない → ページネーション非表示 -->
+        <!--  複数ページある → ページネーション表示 -->
+        <!--  データなし → 空状態メッセージ -->
+    </div>
 </div>
 @endsection
