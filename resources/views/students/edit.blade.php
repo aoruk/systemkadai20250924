@@ -449,4 +449,15 @@ function handleFileSelect(input) {
     }
 }
 </script>
+<!-- 1. ユーザーがファイルを選択
+   ↓
+2. handleFileSelect(input) 実行
+   ↓
+3. DOM要素を取得
+   ↓
+4. ファイルの存在確認
+   ↓
+5. ファイル名を表示
+   ↓
+6. 画像をプレビュー表示　-->
 @endsection
