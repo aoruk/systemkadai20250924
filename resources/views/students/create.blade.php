@@ -312,13 +312,13 @@
                 </div>
             </div>
 
-            <!-- ボタン -->
+            <!-- ボタン 20251022訂正-->
             <div class="form-actions">
                 <a href="{{ route('students.index') }}" class="btn btn-secondary">
-                    キャンセル
+                    戻る
                 </a>
                 <button type="submit" class="btn btn-primary">
-                    登録する
+                    登録
                 </button>
             </div>
         </form>

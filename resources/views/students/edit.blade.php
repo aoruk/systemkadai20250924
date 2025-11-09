@@ -349,9 +349,9 @@
                 <div class="form-help">※ 全角文字で入力してください</div>
             </div>
 
-            <!-- 顔写真 -->
+            <!-- 顔写真 20251022修正-->
             <div class="form-group">
-                <label for="photo" class="form-label">顔写真</label>
+                <label for="photo" class="form-label required">顔写真</label>
                 
                 <!-- 現在の写真 -->
                 @if($student->photo)
@@ -363,7 +363,7 @@
                 </div>
                 @endif
 
-                <!-- 20251013 -->
+                <!-- 20251022 修正-->
                 <div class="file-input-wrapper">
                     <label for="photo" class="file-input-custom" id="fileLabel">
                         <div style="text-align: center;">
@@ -380,11 +380,12 @@
                         name="photo" 
                         accept="image/*"
                         onchange="handleFileSelect(this)"
+                        required
                     >
                     <div id="fileName" class="file-name" style="display: none;"></div>
                 </div>
 
-                <!-- 新しい写真のプレビュー -->
+                <!-- 新しい写真のプレビュー　20251022 -->
                 <div class="photo-preview" id="photoPreview">
                     <div class="photo-preview-label">新しい写真のプレビュー</div>
                     <div class="photo-preview-img">
@@ -395,7 +396,7 @@
                 @error('photo')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
-                <div class="form-help">※ 写真を変更しない場合は選択不要です</div>
+                <div class="form-help">※ 顔写真は必ず選択してください</div>
             </div>
 
             <!-- コメント -->

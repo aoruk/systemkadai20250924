@@ -287,7 +287,7 @@
         </form>
     </div>
 
-    <!-- テーブルセクション 20251007 -->
+    <!-- テーブルセクション 20251022 修正 -->
     <div class="table-section">
         <div class="table-header">
             <h2>学生表示</h2>
@@ -311,7 +311,6 @@
                     <tr>
                         <th>学生</th>
                         <th>名前</th>
-                        <th>住所</th>
                         <th class="actions-cell">詳細表示</th>
                     </tr>
                 </thead>
