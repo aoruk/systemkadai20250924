@@ -265,35 +265,16 @@
                 >
             </div>
 
+            <!-- 20251021 訂正-->
             <div class="search-field">
-                <label for="year">学年</label>
-                <select id="year" name="year">
+                <label for="grade">学年</label>
+                <select id="grade" name="grade">
                     <option value="">すべて</option>
-                    <option value="1" {{ request('year') == '1' ? 'selected' : '' }}>1年生</option>
-                    <option value="2" {{ request('year') == '2' ? 'selected' : '' }}>2年生</option>
-                    <option value="3" {{ request('year') == '3' ? 'selected' : '' }}>3年生</option>
-                    <option value="4" {{ request('year') == '4' ? 'selected' : '' }}>4年生</option>
-                    <option value="5" {{ request('year') == '5' ? 'selected' : '' }}>5年生</option>
-                    <option value="6" {{ request('year') == '6' ? 'selected' : '' }}>6年生</option>
+                    <option value="1" {{ request('grade') == '1' ? 'selected' : '' }}>1年生</option>
+                    <option value="2" {{ request('grade') == '2' ? 'selected' : '' }}>2年生</option>
+                    <option value="3" {{ request('grade') == '3' ? 'selected' : '' }}>3年生</option>
                 </select>
             </div>
-            <!-- <option> タグ:選択肢 を定義 -->
-            <!-- {{ request('year') == '1' ? 'selected' : '' }} これは三項演算子-->
-                <!-- ↓ -->
-            <!-- {{ 条件 ? 真の場合 : 偽の場合 }} -->
-
-            <!-- if文で書くと
-            if (request('year') == '1') {
-                echo 'selected';
-            } else {
-                echo '';
-            } -->
-
-            <!-- request('キー名'):URLのクエリパラメータやPOSTデータを取得 -->
-            <!-- 例え
-            http://localhost/students?name=山田&year=2
-                                      ↑
-                                  request('year') = "2" -->
 
             <div class="search-buttons">
                 <button type="submit" class="btn btn-primary">
@@ -340,7 +321,7 @@
                     <!-- $students の各レコードを $student として1つずつ処理 -->
                     <tr>
                         <td>
-                            <span class="student-year">{{ $student->year }}年生</span>
+                            <span class="student-grade">{{ $student->grade }}年生</span> <!-- 20251021　訂正 -->
                         </td>
                         <td class="student-name">{{ $student->name }}</td>
                         <td>{{ $student->address }}</td>
