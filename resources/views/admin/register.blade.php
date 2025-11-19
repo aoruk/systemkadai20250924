@@ -1,5 +1,5 @@
 @extends('layouts.app')
-<!-- 20251004 -->
+<!-- 20251107 修正 -->
 @section('title', '新規登録')
 
 @section('styles')
@@ -136,7 +136,7 @@
                 <!-- バリデーションエラー時に入力内容を保持 -->
             </div>
             
-            {{-- パスワード --}}
+            {{-- パスワード 20251107 修正--}}
             <div class="form-group">
                 <label for="password">パスワード</label>
                 <input 
@@ -145,9 +145,9 @@
                     name="password" 
                     class="form-control" 
                     required
-                    placeholder="6文字以上のパスワード"
+                    placeholder="8文字以上のパスワード"
                 >
-                <p class="password-note">※6文字以上で設定してください</p>
+                <p class="password-note">※8文字以上で設定してください</p>
                 @error('password')
                     <span class="error">{{ $message }}</span>
                 @enderror
