@@ -229,30 +229,12 @@
                 👤 学生情報
             </div>
 
-            @if(isset($student))
-                <!-- 学生詳細画面から遷移した場合（学生が固定） -->
-                <div class="student-info-box">
-                    <div class="info-label">選択された学生</div>
-                    <div class="info-value">{{ $student->name }} ({{ $student->grade }}年生)</div>
-                </div>
-                <input type="hidden" name="student_id" value="{{ $student->id }}">
-            @else
-                <!-- メニューから直接遷移した場合（学生を選択） -->
-                <div class="form-group">
-                    <label for="student_id" class="form-label required">学生</label>
-                    <select name="student_id" id="student_id" class="form-select @error('student_id') error @enderror" required>
-                        <option value="">学生を選択してください</option>
-                        @foreach($students as $student)
-                            <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
-                                {{ $student->name }} ({{ $student->grade }}年生)
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('student_id')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-            @endif
+            <!-- 学生は常に固定表示 20251104 修正-->
+             <div class="student-info-box">
+                <div class="info-label">選択された学生</div>
+                <div class="info-value">{{ $student->name }} ({{ $student->grade }}年生)</div>
+            </div>
+            <input type="hidden" name="student_id" value="{{ $student->id }}">
         </div>
 
         <div class="form-card">
@@ -450,7 +432,7 @@
             <button type="submit" class="btn btn-primary">
                 💾 成績登録
             </button>
-            <a href="{{ isset($student) ? route('students.show', $student->id) : route('students.index') }}" class="btn btn-secondary">
+            <a href="{{ route('students.show', $student->id) }}" class="btn btn-secondary">
                 キャンセル
             </a>
         </div>
