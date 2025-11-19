@@ -1,15 +1,10 @@
 <!DOCTYPE html>
+<!-- 20251118 修正 -->
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    
-    <!-- スマホやタブレットで見た時に、画面サイズに合わせて表示 -->
-    <!-- width=device-width: 画面の幅に合わせる -->
-    <!-- initial-scale=1.0: 初期の拡大率を100%に -->
     <title>@yield('title', '学生成績管理システム')</title>
-    <!-- ブラウザのタブに表示されるタイトル -->
-    <!-- @yield('title', 'デフォルト値'): 各画面でタイトルを変更できる -->
-    <!-- 設定しない場合は「学生成績管理システム」と表示 -->
     
     <style>
         /* リセットCSS */
@@ -18,9 +13,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-        /* * セレクター */
-        /* すべての要素に適用される */
-        /* HTMLのデフォルトの余白をリセット */
         
         body {
             font-family: "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", "メイリオ", Meiryo, sans-serif;
@@ -28,9 +20,6 @@
             color: #333;
             background-color: #f5f5f5;
         }
-        /* "Hiragino Kaku Gothic ProN": Mac標準の美しい日本語フォント */
-        /* "メイリオ": Windows標準の日本語フォント */
-        /* sans-serif: どれもない場合の最終手段（ゴシック体） */
 
         /* ヘッダー */
         .header {
@@ -39,8 +28,6 @@
             padding: 1rem 2rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        /* remとは？ - 1rem = ルート要素（html）のフォントサイズ 通常、1rem = 16px */
-        /* box-shadow:影をつける（立体感を出す） */
         
         .header h1 {
             font-size: 1.5rem;
@@ -116,9 +103,6 @@
             border-color: #17a2b8;
             color: #0c5460;
         }
-        /* .alert-success 成功メッセージ 緑色 */
-        /* .alert-error エラーメッセージ 赤色 */
-        /* .alert-info 情報メッセージ 青色 */
         
         /* ボタン */
         .btn {
@@ -165,12 +149,6 @@
             padding: 0.25rem 0.75rem;
             font-size: 0.875rem;
         }
-        /* .btn-primary メインアクション 青色 登録ボタン */
-        /* .btn-success 成功・登録 緑色 保存ボタン */
-        /* .btn-warning 警告・編集 黄色 編集ボタン */
-        /* .btn-danger 危険・削除 赤色 削除ボタン */
-        /* .btn-secondary サブアクション グレー キャンセルボタン */
-        /* .btn-sm = Small（小さい）ボタン 20251001ここから */  
 
         /* テーブル */
         table {
@@ -178,8 +156,6 @@
             border-collapse: collapse;
             margin-top: 1rem;
         }
-
-        /* border-collapse: collapse; セルの枠線を1本にまとめる */
         
         table th,
         table td {
@@ -246,8 +222,6 @@
         }
         
         /* ユーティリティ */
-        /* ユーティリティクラスとは？ */
-        /* 1つの機能だけを持つクラスでどこでも使い回せる */
         .text-center {
             text-align: center;
         }
@@ -276,23 +250,14 @@
     @yield('styles')
 </head> 
 
- <body> <!--20251002 -->
+<body>
     @auth
-    <!-- @auth とは？ ログインしているユーザーにだけ表示 -->
-
     <!-- ヘッダー（ログイン後のみ表示） -->
     <header class="header">
         <h1>学生成績管理システム</h1>
         <div class="header-user">
             ログイン中: {{ Auth::user()->name ?? 'ゲスト' }}
         </div>
-
-        <!-- Auth::user() -->
-        <!-- ↑現在ログイン中のユーザー情報を取得 -->
-        <!-- ->name -->
-        <!-- ↑ユーザーの名前を取得 -->
-        <!-- ?? 演算子（Null合体演算子） -->
-        <!-- ↑左側がnullなら右側を使う -->
     </header>
     
     <!-- ナビゲーション（ログイン後のみ表示） -->
@@ -301,12 +266,9 @@
             <li><a href="{{ route('menu') }}">メニュー</a></li>
             <li><a href="{{ route('students.index') }}">学生一覧</a></li>
             <li><a href="{{ route('students.create') }}">学生登録</a></li>
-            <li><a href="{{ route('grades.create') }}">成績追加</a></li>
             <li>
                 <form action="{{ route('logout') }}" method="POST" style="display:inline;">
                     @csrf
-                    <!-- CSRF保護とは？ -->
-                    <!-- 悪いサイトから勝手に操作されないための防御機能 -->
                     <button type="submit" style="background:none; border:none; color:white; cursor:pointer; padding:0.5rem 1rem;">
                         ログアウト
                     </button>
@@ -319,72 +281,23 @@
     <!-- メインコンテンツ -->
     <div class="container">
         <!-- フラッシュメッセージ -->
-
-        <!-- セッションから'success'キーの値を取得  -->
-         <!-- 1. success（成功メッセージ） -->
-         <!-- 用途: -->
-         <!-- 処理が成功した時 -->
-         <!-- データを登録・更新・削除した時 --> 
         @if(session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
         
-        <!-- セッションから'error'キーの値を取得  -->
-         <!-- 2. error（エラーメッセージ） -->
-         <!-- 用途: -->
-         <!-- 処理が失敗した時 -->
-         <!-- 予期しないエラーが発生した時 -->
-         <!-- 権限がない操作をしようとした時 -->
         @if(session('error'))
             <div class="alert alert-error">
                 {{ session('error') }}
             </div>
         @endif
 
-        <!-- セッションから'info'キーの値を取得  -->
-         <!-- 3. info（情報メッセージ） -->
-         <!-- 用途: -->
-         <!-- ユーザーに情報を伝える時 -->
-         <!-- 注意事項を表示する時 -->
-         <!-- 検索結果の件数など -->
         @if(session('info'))
             <div class="alert alert-info">
                 {{ session('info') }}
             </div>
         @endif
-
-        <!-- session() とは？
-        セッションの仕組み
-        リクエスト1（登録画面）
-        ─────────────────
-         ブラウザ → サーバー
-         ↓
-         セッション作成
-         session_id: abc123
-         ↓
-         ブラウザ ← Cookie（session_id=abc123）
-         
-        リクエスト2（登録処理）
-        ─────────────────
-         ブラウザ → サーバー（session_id=abc123を送信）
-         ↓
-         セッションに保存
-         session('success', 'メッセージ')
-         ↓
-         リダイレクト
-
-        リクエスト3（一覧画面）
-        ─────────────────
-         ブラウザ → サーバー（session_id=abc123を送信）
-         ↓
-         セッションから取得
-         session('success')  // 'メッセージ'
-         ↓
-         画面に表示
-         ↓
-         自動的に削除（フラッシュデータ） -->
 
         <!-- バリデーションエラー -->
         @if($errors->any())
@@ -412,4 +325,3 @@
 </body>
         
 </html>
-

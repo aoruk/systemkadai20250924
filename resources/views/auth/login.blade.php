@@ -1,15 +1,9 @@
-@extends('layouts.app') 
-<!-- 20251106 修正 -->
-<!-- @extends と @section
-@extends: layouts/app.blade.phpを継承 -->
+@extends('layouts.app')
+<!-- 20251118 修正 -->
 @section('title', 'ログイン')
-<!-- @section('title', 'ログイン'): ブラウザのタブに「ログイン」と表示 -->
 
 @section('styles')
-<!-- このページだけのCSSを追加 -->
-<!-- app.blade.phpの@yield('styles')に挿入される -->
 <style>
-    /* ログイン画面専用のスタイル */
     .login-container {
         max-width: 400px;
         margin: 3rem auto;
@@ -73,26 +67,17 @@
 @section('content')
 <div class="login-container">
     <div class="login-card">
-        {{-- ロゴ --}}
         <div class="login-logo">
             <div class="login-logo-icon">
                 📚
             </div>
         </div>
         
-        {{-- タイトル --}}
         <h2 class="login-title">学生成績管理システム</h2>
         
-        {{-- ログインフォーム --}}
         <form action="{{ route('login.post') }}" method="POST">
             @csrf
-            <!-- action: 送信先のURL -->
-            <!-- route('login.post'): web.phpで定義したルート名 -->
-            <!-- Route::post('/login', 'AuthController@login')->name('login.post'); -->
-            <!-- method="POST": POSTメソッドで送信 -->
-            <!-- @csrf: CSRF保護トークン    -->
             
-            {{-- メールアドレス --}}
             <div class="form-group">
                 <label for="email">メールアドレス</label>
                 <input 
@@ -108,27 +93,8 @@
                 @error('email')
                     <span class="error">{{ $message }}</span>
                 @enderror
-
-                <!-- value="{{ old('email') }}" -->
-                <!-- 最重要：前回入力した値を表示 -->
-                 <!-- 1. ユーザーが "test@example.com" を入力
-                      2. 送信（パスワードは空）
-                         ↓
-                      3. バリデーション：パスワード必須エラー
-                         ↓
-                      4. ログイン画面に戻る
-                         ↓
-                      5. old('email') が "test@example.com" を返す
-                         ↓
-                      6. 入力欄に表示される（パスワードだけ入力し直せばOK） -->
-
-                <!-- required:HTML5の属性でブラウザが自動チェック。空では送信できない。 -->
-                <!-- autofocus:ページ読み込み時に自動的にフォーカス -->
-                <!-- placeholder:入力欄の中に表示されるヒント文字。クリックすると消える。 -->
-
             </div>
             
-            {{-- パスワード --}}
             <div class="form-group">
                 <label for="password">パスワード</label>
                 <input 
@@ -144,13 +110,11 @@
                 @enderror
             </div>
             
-            {{-- ログインボタン --}}
             <button type="submit" class="btn btn-primary login-btn">
                 ログイン
             </button>
         </form>
         
-        {{-- 新規登録リンク --}}
         <div class="register-link">
             <p>アカウントをお持ちでない方は<a href="{{ route('admin.register') }}">新規登録</a></p>
         </div>
