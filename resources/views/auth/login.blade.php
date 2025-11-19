@@ -1,5 +1,5 @@
 @extends('layouts.app') 
-<!-- 20251003 -->
+<!-- 20251106 修正 -->
 <!-- @extends と @section
 @extends: layouts/app.blade.phpを継承 -->
 @section('title', 'ログイン')
@@ -142,18 +142,6 @@
                 @error('password')
                     <span class="error">{{ $message }}</span>
                 @enderror
-            </div>
-            
-            {{-- ログイン状態を保持 --}}
-            <div class="form-group">
-                <label style="display: flex; align-items: center; font-weight: normal;">
-                    <input 
-                        type="checkbox" 
-                        name="remember" 
-                        style="margin-right: 0.5rem;"
-                    >
-                    ログイン状態を保持する
-                </label>
             </div>
             
             {{-- ログインボタン --}}
