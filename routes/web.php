@@ -46,20 +46,6 @@ Route::post('/login', 'AuthController@login')->name('login.post');
  3.AuthControllerのloginメソッドが実行される
 */
 
-// ログアウト処理を実行（POST）
-Route::post('/logout', 'AuthController@logout')->name('logout');
-/* 20250927
- ・HTTPメソッド: POST - ログアウト処理（状態変更）のため
- ・URL: /logout
- ・処理: AuthControllerのloginメソッドを実行
- ・ルート名: logout
-
- 実際の処理の流れ
- 1.ログアウトボタンをクリック
- 2.このルートが呼ばれる
- 3.AuthControllerのloginメソッドが実行される
-*/
-
 // 管理ユーザー新規登録　20250927
 // 登録画面を表示（GET）
 Route::get('/admin/register', function () {
@@ -112,7 +98,19 @@ Route::middleware(['auth'])->group(function () {
      ・group(function () { ... }) : 複数のルートをまとめる
      ・['auth'] : 配列で複数のミドルウェアを指定可能
  */   
+    // ログアウト処理を実行（POST）20251125 修正
+    Route::post('/logout', 'AuthController@logout')->name('logout');
+/* 20250927
+ ・HTTPメソッド: POST - ログアウト処理（状態変更）のため
+ ・URL: /logout
+ ・処理: AuthControllerのloginメソッドを実行
+ ・ルート名: logout
 
+ 実際の処理の流れ
+ 1.ログアウトボタンをクリック
+ 2.このルートが呼ばれる
+ 3.AuthControllerのloginメソッドが実行される
+*/
     // メニュー画面　20250928
     Route::get('/menu', function () {
         return view('menu.index');
@@ -363,8 +361,8 @@ Route::middleware(['auth'])->group(function () {
   |  「削除しました」      　 |                          |
  */
 
-         // 検索機能（ここに移動）20251003
-         Route::get('/search', 'StudentController@search')->name('students.search');
+         // 検索機能（ここに移動）20251003 20251125 ルート削除
+        //  Route::get('/search', 'StudentController@search')->name('students.search');
 /* 20250930
   ・HTTPメソッド: GET - 検索結果を表示
   ・URL: '/search' (相対パス) + '/students/' (prefix)
@@ -395,8 +393,8 @@ Route::middleware(['auth'])->group(function () {
   // ここに書いたルートは全て /grades/ から始まる
   });　
  */        
-      // 成績追加画面 20250930
-      Route::get('/create/{student_id?}', 'GradeController@create')->name('grades.create');
+      // 成績追加画面 20251125 修正
+      Route::get('/create/{student_id}', 'GradeController@create')->name('grades.create');
 /* 20250930
  ・HTTPメソッド: GET - 成績追加画面を表示
  ・URL: '/create/{student_id?}' (相対パス) + '/grades/' (prefix)
