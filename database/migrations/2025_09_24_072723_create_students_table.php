@@ -1,5 +1,5 @@
 <?php
-
+// 20251124 修正
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,8 +17,8 @@ class CreateStudentsTable extends Migration
             $table->bigIncrements('id');
             $table->integer('grade');
             $table->string('name');
-            $table->string('address');
-            $table->string('img_path')->nullable();
+            $table->text('address');              // ← string から text に変更
+            $table->string('photo')->nullable();  // ← img_path から photo に変更
             $table->text('comment')->nullable();
             $table->timestamps();
         });
@@ -66,4 +66,4 @@ class CreateStudentsTable extends Migration
  nullable()について
  なし: そのカラムは必須入力（NOT NULL）
  ->nullable(): そのカラムは空でもOK（NULL許可）
-*/
+ */
