@@ -1,5 +1,5 @@
 @extends('layouts.app')
-<!-- 20251010 -->
+<!-- 20251010 20251129 修正 -->
 @section('title', '学生詳細')
 
 @section('styles')
@@ -157,6 +157,7 @@
         border-radius: 12px;
         padding: 30px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        position: relative; /* 20251129追加 */
     }
 
     .section-header {
@@ -224,6 +225,78 @@
     .no-grades p {
         font-size: 16px;
         margin-bottom: 20px;
+    }
+
+    /* 検索フォーム用スタイル 20251129 追加 */
+    .grades-search-form {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: #f7fafc;
+        border-radius: 8px;
+    }
+
+    .grades-search-field {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .grades-search-field label {
+        display: block;
+        font-size: 13px;
+        color: #4a5568;
+        margin-bottom: 6px;
+        font-weight: 500;
+    }
+
+    .grades-search-field select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+
+    .grades-search-field select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .grades-search-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    /* ローディング表示用 20251129 追加 */
+    .grades-loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border-radius: 12px;
+    }
+
+    .grades-loading-overlay.active {
+        display: flex;
+    }
+
+    .grades-spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
     }
 
     @media (max-width: 768px) {
@@ -308,8 +381,13 @@
             </div>
         </div>
 
-        <!-- 成績一覧セクション 20251011 -->
+        <!-- 成績一覧セクション 20251011 20251129 Ajax対応 -->
         <div class="grades-section">
+            <!-- ローディング表示 -->
+            <div class="grades-loading-overlay" id="gradesLoadingOverlay">
+                <div class="grades-spinner"></div>
+            </div>
+
             <div class="section-header">
                 <h2>
                     📊 成績一覧
@@ -319,53 +397,113 @@
                 </a>
             </div>
 
-            @if($student->grades && count($student->grades) > 0)
-            <div class="grades-table-wrapper">
-                <table class="grades-table">
-                    <thead>
-                        <tr>
-                            <th>学年</th>
-                            <th>学期</th>
-                            <th>国語</th>
-                            <th>数学</th>
-                            <th>理科</th>
-                            <th>社会</th>
-                            <th>音楽</th>
-                            <th>家庭科</th>
-                            <th>英語</th>
-                            <th>美術</th>
-                            <th>保健体育</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($student->grades as $grade)
-                        <tr>
-                            <td>{{ $grade->grade }}年</td>
-                            <td>{{ $grade->semester }}学期</td>
-                            <td>{{ $grade->japanese ?? '-' }}</td>
-                            <td>{{ $grade->math ?? '-' }}</td>
-                            <td>{{ $grade->science ?? '-' }}</td>
-                            <td>{{ $grade->social ?? '-' }}</td>
-                            <td>{{ $grade->music ?? '-' }}</td>
-                            <td>{{ $grade->home_economics ?? '-' }}</td>
-                            <td>{{ $grade->english ?? '-' }}</td>
-                            <td>{{ $grade->art ?? '-' }}</td>
-                            <td>{{ $grade->health ?? '-' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <!-- 検索フォーム 20251129 追加 -->
+            <form id="gradesSearchForm" class="grades-search-form">
+                @csrf
+                <div class="grades-search-field">
+                    <label for="grade_filter">学年</label>
+                    <select id="grade_filter" name="grade_filter">
+                        <option value="">すべて</option>
+                        <option value="1">1年</option>
+                        <option value="2">2年</option>
+                        <option value="3">3年</option>
+                    </select>
+                </div>
+
+                <div class="grades-search-field">
+                    <label for="semester_filter">学期</label>
+                    <select id="semester_filter" name="semester_filter">
+                        <option value="">すべて</option>
+                        <option value="1">1学期</option>
+                        <option value="2">2学期</option>
+                        <option value="3">3学期</option>
+                    </select>
+                </div>
+
+                <div class="grades-search-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        検索
+                    </button>
+                    <button type="button" id="gradesClearBtn" class="btn btn-secondary">
+                        クリア
+                    </button>
+                </div>
+            </form>
+
+            <!-- 成績テーブルコンテナ -->
+            <div id="grades-table-container">
+                @if($student->grades && count($student->grades) > 0)
+                    @include('students.partials.grades_table', ['grades' => $student->grades])
+                @else
+                    <div class="no-grades">
+                        <div class="no-grades-icon">📝</div>
+                        <p>まだ成績が登録されていません</p>
+                        <a href="{{ route('grades.create', $student->id) }}" class="btn btn-primary">
+                            最初の成績を登録する
+                        </a>
+                    </div>
+                @endif
             </div>
-            @else
-            <div class="no-grades">
-                <div class="no-grades-icon">📝</div>
-                <p>まだ成績が登録されていません</p>
-                <a href="{{ route('grades.create', $student->id) }}" class="btn btn-primary">
-                    最初の成績を登録する
-                </a>
-            </div>
-            @endif
         </div>
     </div>
 </div>
+@endsection
+
+<!-- 20251129 -->
+@section('scripts')
+<script>
+$(document).ready(function() {
+    // CSRFトークンの設定
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    // 成績検索フォームの送信
+    $('#gradesSearchForm').on('submit', function(e) {
+        e.preventDefault();
+        searchGrades();
+    });
+
+    // クリアボタン
+    $('#gradesClearBtn').on('click', function() {
+        $('#grade_filter').val('');
+        $('#semester_filter').val('');
+        searchGrades();
+    });
+
+    // 成績検索実行関数
+    function searchGrades() {
+        // ローディング表示
+        $('#gradesLoadingOverlay').addClass('active');
+
+        // 検索パラメータ
+        const searchData = {
+            grade_filter: $('#grade_filter').val(),
+            semester_filter: $('#semester_filter').val()
+        };
+
+        // Ajax通信
+        $.ajax({
+            url: '{{ route("grades.search", $student->id) }}',
+            type: 'GET',
+            data: searchData,
+            dataType: 'json',
+            success: function(response) {
+                // テーブルを更新
+                $('#grades-table-container').html(response.html);
+                
+                // ローディング非表示
+                $('#gradesLoadingOverlay').removeClass('active');
+            },
+            error: function(xhr, status, error) {
+                console.error('検索エラー:', error);
+                alert('検索中にエラーが発生しました。');
+                $('#gradesLoadingOverlay').removeClass('active');
+            }
+        });
+    }
+});
+</script>
 @endsection

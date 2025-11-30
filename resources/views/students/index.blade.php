@@ -1,5 +1,5 @@
 @extends('layouts.app')
-<!-- 20251018 修正 -->
+<!-- 20251018 修正 20251128 Ajax対応-->
 @section('title', '学生表示')
 
 @section('styles')
@@ -100,6 +100,7 @@
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         overflow: hidden;
+        position: relative; /*20251128 追加*/
     }
     /* overflow: hidden; overflow は、要素の内容が領域からはみ出した場合の表示方法を指定する */
     /* overflow の値 */
@@ -213,6 +214,38 @@
         margin-bottom: 20px;
     }
 
+    /* ローディング表示用スタイル 20251128 追加 */
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+    
+    .loading-overlay.active {
+        display: flex;
+    }
+    
+    .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
     @media (max-width: 768px) {
         .page-header {
             flex-direction: column;
@@ -250,10 +283,11 @@
         </div>
     </div>
 
-    <!-- 検索セクション -->
+    <!-- 検索セクション 20251128 Ajax対応 -->
     <div class="search-section">
         <h2>🔍 検索フォーム</h2>
-        <form action="{{ route('students.index') }}" method="GET" class="search-form">
+        <form id="searchForm" class="search-form"> <!-- 20251128 訂正-->
+            @csrf
             <div class="search-field">
                 <label for="name">学生名</label>
                 <input 
@@ -280,75 +314,154 @@
                 <button type="submit" class="btn btn-primary">
                     検索
                 </button>
-                <a href="{{ route('students.index') }}" class="btn btn-secondary">
+                <button type="button" id="clearBtn" class="btn btn-secondary"> <!-- 20251128 訂正-->
                     クリア
                 </a>
             </div>
         </form>
     </div>
 
-    <!-- テーブルセクション 20251022 修正 -->
+    <!-- テーブルセクション 20251022 修正 20251128 Ajax対応 -->
     <div class="table-section">
+        <!-- ローディング表示 -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+        </div>
+
         <div class="table-header">
-            <h2>学生表示</h2>
-            <span class="student-count">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <h2>学生表示</h2>
+                <!-- ソートボタン -->
+                 <button type="button" id="sortBtn" class="btn btn-secondary btn-sm" data-order="asc">
+                    学年順 ↑
+                </button>
+            </div>
+            <span class="student-count" id="studentCount">
                 全 {{ $students->total() ?? 0 }} 件
             </span>
         </div>
-        {{-- $students->total() ?? 0 は学生の総件数を表示（エラー回避付き） --}}
-        {{-- ?? は Null合体演算子 --}}
-        {{-- 値1 ?? 値2: 値1が存在してnullでなければ値1、そうでなければ値2を返す --}}
 
-        @if($students->count() > 0)
-        <!-- 条件分岐 「学生が1件以上いる場合のみテーブルを表示」-->
-        <!-- @if($students->count() > 0)
-         学生データがある場合に表示
-         @endif -->
-        <!-- $students->count() とは？ 現在ページの件数 を取得-->
-            <table>
-                <thead>
-                    <tr>
-                        <th>学生</th>
-                        <th>名前</th>
-                        <th class="actions-cell">詳細表示</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($students as $student)
-                    <!-- ループ処理 -->
-                    <!-- $students の各レコードを $student として1つずつ処理 -->
-                    <tr>
-                        <td>
-                            <span class="student-grade">{{ $student->grade }}年生</span> <!-- 20251021　訂正 -->
-                        </td>
-                        <td class="student-name">{{ $student->name }}</td>
-                        <td>{{ $student->address }}</td>
-                        <td class="actions-cell">
-                            <a href="{{ route('students.show', $student->id) }}" class="btn btn-primary btn-sm">
-                                詳細表示
-                            </a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            <!-- ページネーション -->
-            @if($students->hasPages()) <!--「ページが複数ある場合のみページネーションを表示」 -->
-            <div style="padding: 20px 24px; border-top: 1px solid #e2e8f0;">
-                {{ $students->links() }}
-            </div>
-            @endif
-        @else
-            <div class="empty-state">
-                <div class="empty-state-icon">📭</div>
-                <h3>学生が見つかりませんでした</h3>
-                <p>検索条件を変更してください。</p>
-            </div>
-        @endif
-        <!--  1ページしかない → ページネーション非表示 -->
-        <!--  複数ページある → ページネーション表示 -->
-        <!--  データなし → 空状態メッセージ -->
+        <!-- テーブルコンテナ 20251128 修正 -->
+         <div id="students-table-container">
+            @include('students.partials.table', ['students' => $students])
+        </div>
     </div>
 </div>
+@endsection
+
+<!-- 20251128 追加 -->
+@section('scripts')
+<script>
+$(document).ready(function() {
+    // CSRFトークンの設定
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    // 現在のソート順を保持
+    let currentOrder = 'asc';
+
+    // 検索フォームの送信
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        searchStudents();
+    });
+
+    // クリアボタン
+    $('#clearBtn').on('click', function() {
+        $('#name').val('');
+        $('#grade').val('');
+        currentOrder = 'asc'; // ソート順もリセット
+        updateSortButton();
+        searchStudents();
+    });
+
+    // ソートボタン
+    $('#sortBtn').on('click', function() {
+        // ソート順を切り替え
+        currentOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+        updateSortButton();
+        sortStudents();
+    });
+
+    // ソートボタンの表示更新
+    function updateSortButton() {
+        const btn = $('#sortBtn');
+        if (currentOrder === 'asc') {
+            btn.text('学年順 ↑');
+            btn.attr('data-order', 'asc');
+        } else {
+            btn.text('学年順 ↓');
+            btn.attr('data-order', 'desc');
+        }
+    }
+
+    // 検索実行関数
+    function searchStudents(page = 1) {
+        $('#loadingOverlay').addClass('active');
+
+        const searchData = {
+            name: $('#name').val(),
+            grade: $('#grade').val(),
+            page: page
+        };
+
+        $.ajax({
+            url: '{{ route("students.search") }}',
+            type: 'GET',
+            data: searchData,
+            dataType: 'json',
+            success: function(response) {
+                $('#students-table-container').html(response.html);
+                $('#studentCount').text('全 ' + response.total + ' 件');
+                $('#loadingOverlay').removeClass('active');
+            },
+            error: function(xhr, status, error) {
+                console.error('検索エラー:', error);
+                alert('検索中にエラーが発生しました。');
+                $('#loadingOverlay').removeClass('active');
+            }
+        });
+    }
+
+    // ソート実行関数
+    function sortStudents(page = 1) {
+        $('#loadingOverlay').addClass('active');
+
+        const sortData = {
+            name: $('#name').val(),      // 検索条件も一緒に送る
+            grade: $('#grade').val(),    // 検索条件も一緒に送る
+            order: currentOrder,
+            page: page
+        };
+
+        $.ajax({
+            url: '{{ route("students.sort") }}',
+            type: 'GET',
+            data: sortData,
+            dataType: 'json',
+            success: function(response) {
+                $('#students-table-container').html(response.html);
+                $('#studentCount').text('全 ' + response.total + ' 件');
+                $('#loadingOverlay').removeClass('active');
+            },
+            error: function(xhr, status, error) {
+                console.error('ソートエラー:', error);
+                alert('ソート中にエラーが発生しました。');
+                $('#loadingOverlay').removeClass('active');
+            }
+        });
+    }
+
+    // ページネーションのクリックイベント
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        const page = new URL(url).searchParams.get('page');
+        searchStudents(page);
+    });
+});
+</script>
 @endsection

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<!-- 20251118 修正 -->
+<!-- 20251118 修正 20251128 修正 -->
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF Token 20251128 追加 -->
     <title>@yield('title', '学生成績管理システム')</title>
     
     <style>
@@ -320,6 +321,9 @@
     <footer class="footer">
         <p>&copy; 2025 学生成績管理システム</p>
     </footer>
+    
+    <!-- jQuery 20251128 追加 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     @yield('scripts')
 </body>

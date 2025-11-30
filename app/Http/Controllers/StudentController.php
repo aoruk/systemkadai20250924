@@ -236,4 +236,134 @@ class StudentController extends Controller
         return redirect()->route('students.index')
                         ->with('success', '学生を削除しました');
     }
+
+    /**
+     ** search メソッド Ajax検索用API
+     * GET /students/search
+     ** 20251128 追加
+     **/
+    public function search(Request $request)
+    {
+        // 検索パラメータの取得
+        $name = $request->input('name');
+        $grade = $request->input('grade');
+        
+        // 学生データの取得（検索機能付き）
+        $query = Student::query();
+        
+        // 名前で検索
+        if ($name) {
+            $query->where('name', 'like', "%{$name}%");
+        }
+        
+        // 学年で検索
+        if ($grade) {
+            $query->where('grade', $grade);
+        }
+        
+        // 学年順、ID順で並び替え、ページネーション
+        $students = $query->orderBy('grade', 'asc')
+                         ->orderBy('id', 'asc')
+                         ->paginate(10);
+        
+        // JSON形式で返却（Ajax用）
+        return response()->json([
+            'html' => view('students.partials.table', compact('students'))->render(),
+            'total' => $students->total(),
+            'current_page' => $students->currentPage(),
+            'last_page' => $students->lastPage()
+        ]);
+    }
+
+    /**
+     * sort メソッド Ajaxソート用API
+     * GET /students/sort
+     * 20251128 追加
+    */
+    public function sort(Request $request)
+    {
+        // ソート順を取得（デフォルトは昇順）
+        $order = $request->input('order', 'asc'); // 'asc' または 'desc'
+        
+        // 検索条件も保持（検索とソートの併用対応）
+        $name = $request->input('name');
+        $grade = $request->input('grade');
+        
+        // 学生データの取得
+        $query = Student::query();
+        
+        // 名前で検索（条件がある場合）
+        if ($name) {
+            $query->where('name', 'like', "%{$name}%");
+        }
+        
+        // 学年で検索（条件がある場合）
+        if ($grade) {
+            $query->where('grade', $grade);
+        }
+        
+        // ソート処理
+        $query->orderBy('grade', $order)
+              ->orderBy('id', 'asc'); // 同じ学年内はID順
+        
+        // ページネーション
+        $students = $query->paginate(10);
+        
+        // JSON形式で返却（Ajax用）
+        return response()->json([
+            'html' => view('students.partials.table', compact('students'))->render(),
+            'total' => $students->total(),
+            'current_page' => $students->currentPage(),
+            'last_page' => $students->lastPage()
+        ]);
+    }
+
+    /**
+     * updateYear メソッド 学年一括更新処理
+     * POST /students/update-year
+     * 20251130 追加
+    */
+    public function updateYear()
+    {
+        try {
+            // トランザクション開始（エラー時に全てロールバック）
+            \DB::beginTransaction();
+            
+            // 全学生を取得
+            $students = Student::all();
+            
+            $updated = 0;      // 更新した学生数
+            $graduated = 0;    // 卒業した学生数
+            
+            foreach ($students as $student) {
+                if ($student->grade < 3) {
+                    // 1年生 → 2年生、2年生 → 3年生
+                    $student->grade += 1;
+                    $student->save();
+                    $updated++;
+                } elseif ($student->grade == 3) {
+                    // 3年生 → 卒業（削除または卒業フラグ）
+                    // ここでは削除する実装
+                    $student->delete();
+                    $graduated++;
+                }
+            }
+            
+            // トランザクションをコミット
+            \DB::commit();
+            
+            // 成功メッセージ
+            $message = "学年を更新しました。進級: {$updated}名、卒業: {$graduated}名";
+            
+            return redirect()->route('menu')
+                            ->with('success', $message);
+                            
+        } catch (\Exception $e) {
+            // エラー時はロールバック
+            \DB::rollback();
+            
+            return redirect()->route('menu')
+                            ->with('error', '学年更新中にエラーが発生しました。');
+        }
+    }
 }

@@ -160,7 +160,7 @@ Route::middleware(['auth'])->group(function () {
  */        
         // 学生表示画面 20250928
         Route::get('/', 'StudentController@index')->name('students.index');
- /* 20250928
+/* 20250928
  ・HTTPメソッド: GET - 画面を表示
  ・URL: '/' (相対パス)+ '/students/'(prefix)
  ・処理: StudentControllerのindexを実行
@@ -172,11 +172,90 @@ Route::middleware(['auth'])->group(function () {
  2.Laravel が StudentController を探す(ファイル場所: app/Http/Controllers/StudentController.php)
  3.indexメソッドを実行し、学生一覧データを取得
  4.表示されるファイル:resources/views/students/index.blade.php
- */   
+*/
+        // Ajax検索用API 20251128
+        Route::get('/search', 'StudentController@search')->name('students.search');
+/* 20251128
+  ・HTTPメソッド: GET - 検索結果を表示
+  ・URL: '/search' (相対パス) + '/students/search' (完全URL)
+  ・Route::prefix('students') グループ内にあるため、自動的に /students/ が前につく
+  ・処理: StudentControllerのsearchを実行
+  ・使い方: route('students.search') で URL を生成
+  ・ルート名: students.search
+
+  実際の処理の流れ(JavaScriptからのAjax呼び出し)
+  $.ajax({
+    url: '{{ route("students.search") }}',  // → /students/search
+    type: 'GET',
+    data: {
+        name: '山田',
+        grade: '1'
+    }
+  });
+
+  **実際に送信されるURL:**
+  GET /students/search?name=山田&grade=1
+
+  (コントローラーでの処理)
+  public function search(Request $request)
+  {
+    $name = $request->input('name');    // '山田'
+    $grade = $request->input('grade');  // '1'
+    
+    // 検索処理...
+    
+    return response()->json([
+        'html' => '...',
+        'total' => 5
+    ]);
+  }
+*/
+        // Ajaxソート用API 20251128 追加
+        Route::get('/sort', 'StudentController@sort')->name('students.sort');
+/* 20251128
+ ・HTTPメソッド: GET - 画面を表示
+ ・URL: '/sort' (相対パス)+ '/students/sort'(完全URL)
+ ・Route::prefix('students') グループ内にあるため
+ ・処理: StudentControllerのindexを実行
+ ・使い方: route('students.sort') で URL を生成
+ ・ルート名: students.sort
+
+ 実際の処理の流れ
+ (JavaScriptからのAjax呼び出し)
+ $.ajax({
+    url: '{{ route("students.sort") }}',  // → /students/sort
+    type: 'GET',
+    data: {
+        order: 'desc',  // 降順
+        name: '山田',   // 検索条件も一緒に送る
+        grade: '1'
+    }
+  });
+  **実際に送信されるURL:**
+  GET /students/sort?order=desc&name=山田&grade=1
+
+  (コントローラーでの処理)
+  public function sort(Request $request)
+  {
+    $order = $request->input('order');  // 'desc'
+    $name = $request->input('name');    // '山田'
+    $grade = $request->input('grade');  // '1'
+    
+    // ソート処理...
+    
+    return response()->json([
+        'html' => '...',
+        'total' => 5
+    ]);
+  }
+*/
+        // 学年更新処理 20251130 追加
+        Route::post('/update-year', 'StudentController@updateYear')->name('students.updateYear');
+
         // 学生登録画面 20250928
         // 登録画面を表示（GET）
         Route::get('/create', 'StudentController@create')->name('students.create');
- /* 20250928
+/* 20250928
  ・HTTPメソッド: GET - 学生登録画面を表示
  ・URL: '/create' (相対URL)+ '/students/create'(完全URL)
  ・処理: StudentControllerのcreateを実行
@@ -185,10 +264,10 @@ Route::middleware(['auth'])->group(function () {
 
  実際の処理の流れ
  　新規登録フォームを表示するだけ
- */
+*/
         // 登録処理を実行（POST）
         Route::post('/store', 'StudentController@store')->name('students.store');
- /* 20250928
+/* 20250928
  ・HTTPメソッド: POST - 学生登録処理を実行
  ・URL: '/store' (相対パス)+ '/students/store'(完全URL)
  ・処理: StudentControllerのstoreを実行
@@ -218,10 +297,10 @@ Route::middleware(['auth'])->group(function () {
  3.バリデーション失敗
    → 自動で GET /students/create にリダイレクト
    → 登録フォーム再表示（エラーメッセージ＋入力値保持）
- */       
+*/       
         // 学生詳細表示画面 20250928
         Route::get('/{id}', 'StudentController@show')->name('students.show');
- /* 20250928
+/* 20250928
  ・HTTPメソッド: GET - 画面を表示
  ・URL: '/{id}' (prefix内での相対パス)+ '/students/123'(実際のURL（123は学生ID))
  ・パラメーター: {id} URLから学生IDを受け取る
@@ -268,11 +347,11 @@ Route::middleware(['auth'])->group(function () {
  return view('students.show', compact('student'))
      ↓
  詳細画面表示 resources/views/students/show.blade.php
- */
+*/
         // 学生編集画面 20250929
         // 編集画面を表示（GET）
         Route::get('/{id}/edit', 'StudentController@edit')->name('students.edit');
- /* 20250929
+/* 20250929
  ・HTTPメソッド: GET - 学生編集画面を表示
  ・URL: '/{id}/edit' (prefix内での相対パス)+ '/students/123/edit'(実際のURL)
  ・パラメーター: {id} URLから編集する学生IDを受け取る
@@ -298,10 +377,10 @@ Route::middleware(['auth'])->group(function () {
  return view('students.edit', compact('student'))
       ↓
  編集フォームに現在の値が入った状態で表示
- */
+*/
         // 編集内容を更新（PUT）
         Route::put('/{id}', 'StudentController@update')->name('students.update');
- /* 20250929
+/* 20250929
  ・HTTPメソッド: PUT - データ更新専用メソッド(全体更新)
  ・URL: '/{id}' (prefix内での相対パス)+ '/students/123'(実際のURL)
  ・処理: StudentController@updateの更新処理メソッドを実行
@@ -321,10 +400,10 @@ Route::middleware(['auth'])->group(function () {
  4.【詳細画面】
     URL: /students/123
     学生詳細 名前[田中次郎]に更新済み
- */
+*/
          // 学生削除
          Route::delete('/{id}', 'StudentController@destroy')->name('students.destroy');
- /* 20250929
+/* 20250929
   ・HTTPメソッド: DELETE - データを削除
   ・URL: '/{id}' (prefix内での相対パス)+ '/students/{id}'(実際のURL)
   ・処理: StudentController@destroyの削除処理メソッドを実行
@@ -359,32 +438,9 @@ Route::middleware(['auth'])->group(function () {
   |   7. 一覧画面表示        |                          |
   |<-----------------------|                          |
   |  「削除しました」      　 |                          |
- */
-
-         // 検索機能（ここに移動）20251003 20251125 ルート削除
-        //  Route::get('/search', 'StudentController@search')->name('students.search');
-/* 20250930
-  ・HTTPメソッド: GET - 検索結果を表示
-  ・URL: '/search' (相対パス) + '/students/' (prefix)
-  ・パラメータ: クエリストリング（URLの?以降）で検索条件を受け取る
-    - 例: /students/search?keyword=山田 → 「山田」で検索
-    - 例: /students/search?keyword=太郎&grade=1 → 複数条件で検索
-  ・処理: StudentControllerのsearchを実行
-  ・return view('students.index', compact('students')): 検索結果を表示
-  ・ルート名: students.search
-
-  実際の処理の流れ
-  1. ユーザーが検索フォームにキーワードを入力して送信
-  2. ブラウザが GET /students/search?keyword=山田 にアクセス
-  3. Laravel が StudentController を探す (ファイル場所: app/Http/Controllers/StudentController.php)
-  4. searchメソッドを実行
-     - $request->get('keyword'): 検索キーワードを取得
-     - Student::where('name', 'like', "%山田%"): あいまい検索を実行
-     - SQL実行例: SELECT * FROM students WHERE name LIKE '%山田%'
-  5. 表示されるファイル: resources/views/students/index.blade.php
-  6. 検索結果の学生一覧が表示される
 */
     });
+
     // 成績管理関連 20250930
     Route::prefix('grades')->group(function () {
  /* 20250930
@@ -392,7 +448,58 @@ Route::middleware(['auth'])->group(function () {
   Route::prefix('grades')->group(function () {
   // ここに書いたルートは全て /grades/ から始まる
   });　
- */        
+ */
+      // Ajax成績検索用API 20251129 追加
+      Route::get('/search/{student_id}', 'GradeController@search')->name('grades.search');
+/* 20251129
+  ・HTTPメソッド: GET - 検索結果を表示
+  ・URL: '/search/{student_id}' (相対パス) + '/grades/search/{student_id}' (完全URL)
+  ・Route::prefix('grades') グループ内にあるため
+  ・パラメータ: {student_id} - URLから学生IDを受け取る (例: /grades/search/5 → student_id = 5(学生ID))
+  ・処理: GradeControllerのsearchを実行
+  ・使い方: route('grades.search', $student_id)でURLを生成
+  ・ルート名: students.search
+
+  実際の処理の流れ(JavaScriptからのAjax呼び出し)
+  // Bladeテンプレート内
+  $.ajax({
+    url: '{{ route("grades.search", $student->id) }}',  // → /grades/search/5
+    type: 'GET',
+    data: {
+        grade_filter: '2',     // 2年
+        semester_filter: '1'   // 1学期
+    }
+  });
+  **実際に送信されるURL:**
+  GET /grades/search/5?grade_filter=2&semester_filter=1 ※ 学生ID=5の、2年1学期の成績を検索
+
+  (コントローラーでの処理)
+  public function search($student_id, Request $request)
+  {
+    // $student_id = 5 （URLから自動的に渡される）
+    
+    $grade_filter = $request->input('grade_filter');      // '2'
+    $semester_filter = $request->input('semester_filter'); // '1'
+    
+    // 学生ID=5 の成績を検索
+    $query = Grade::where('student_id', $student_id);
+    
+    // 2年1学期でフィルタリング
+    if ($grade_filter) {
+        $query->where('grade', $grade_filter);
+    }
+    if ($semester_filter) {
+        $query->where('semester', $semester_filter);
+    }
+    
+    $grades = $query->get();
+    
+    return response()->json([
+        'html' => '...',
+        'count' => $grades->count()
+    ]);
+  }
+*/  
       // 成績追加画面 20251125 修正
       Route::get('/create/{student_id}', 'GradeController@create')->name('grades.create');
 /* 20250930
@@ -439,7 +546,7 @@ Route::middleware(['auth'])->group(function () {
 */      
       // 成績編集画面 20250930
       Route::get('/{id}/edit', 'GradeController@edit')->name('grades.edit');
- /* 20250930
+/* 20250930
  ・HTTPメソッド: GET - 成績編集画面を表示
  ・URL: '/{id}/edit' (相対パス) + '/grades/' (prefix)
  ・パラメーター: {id} URLから編集する学生IDを受け取る
@@ -457,10 +564,10 @@ Route::middleware(['auth'])->group(function () {
    - Student::all(): 学生リストも取得（学生変更の可能性のため）
  4. 表示されるファイル: resources/views/grades/edit.blade.php
  5. フォームに既存のデータ（科目名、点数など）が表示される
- */      
+*/      
       // 成績更新処理 20250930
       Route::put('/{id}', 'GradeController@update')->name('grades.update');
- /* 20250930
+/* 20250930
   ・HTTPメソッド: PUT - データ更新専用メソッド(全体更新)
   ・URL: '/{id}' (相対パス) + '/grades/' (prefix)
   ・パラメータ: {id} - 更新する成績のID（必須）

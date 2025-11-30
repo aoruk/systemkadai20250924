@@ -176,4 +176,39 @@ class GradeController extends Controller
         return redirect()->route('students.show', $student_id)
                         ->with('success', '成績を削除しました');
     }
+
+    /**
+     * search() メソッド Ajax成績検索用API
+     * GET /grades/search/{student_id}
+     * 20251129 追加
+    */
+    public function search($student_id, Request $request)
+    {
+        // 学生データを取得
+        $student = Student::findOrFail($student_id);
+        
+        // 成績データのクエリを開始
+        $query = Grade::where('student_id', $student_id);
+        
+        // 学年でフィルタリング
+        if ($request->filled('grade_filter')) {
+            $query->where('grade', $request->grade_filter);
+        }
+        
+        // 学期でフィルタリング
+        if ($request->filled('semester_filter')) {
+            $query->where('semester', $request->semester_filter);
+        }
+        
+        // 学年、学期の順で並び替え
+        $grades = $query->orderBy('grade', 'asc')
+                       ->orderBy('semester', 'asc')
+                       ->get();
+        
+        // JSON形式で返却（Ajax用）
+        return response()->json([
+            'html' => view('students.partials.grades_table', compact('grades'))->render(),
+            'count' => $grades->count()
+        ]);
+    }
 }
